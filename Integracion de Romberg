@@ -1,0 +1,246 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyP1dHYpEWE/f2zC2H/dbbq5",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/Edainf8/M-todos-num-ricos-II-/blob/main/Integracion%20de%20Romberg\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "#**INTEGRACIÓN DE ROMBERG**"
+      ],
+      "metadata": {
+        "id": "U4Mu5oqEDijz"
+      }
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "LJ8FwI7SBFdN"
+      },
+      "outputs": [],
+      "source": [
+        "import numpy as np\n",
+        "import matplotlib.pyplot as plt\n",
+        "import sympy as sy"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "### _Introducción_\n",
+        "Para usar la integracion de Romberg tenemos que usar la regla compuesta del trapecio para obtener aproximaciones preliminares y luego usa la extrapolación de Richardson para mejorarlas"
+      ],
+      "metadata": {
+        "id": "sj9qX_4WpdDq"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "### _Teorema (Regla Compuesta del Trapecio)_\n",
+        "Sean $f\\in C^2[a,b], h=\\frac{b-a}{n}$ y $x_j=a+jh$ para $j=0,1,...,n.$ Existe una \\mu \\in (a,b) tal que la regla compuesta del trapecio para n subintervalos  es:\n",
+        "$$\\int_{a}^{b}f(x)dx=\\frac{h}{2}[f(a)+ \\sum_{j=1}^{n-1}f(x_j)+f(b)]-\\frac{b-a}{12}h^2f^{II}(\\mu)$$"
+      ],
+      "metadata": {
+        "id": "W1PvKSmEsn9A"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "###_Teorema(Extrapolación de Richardson)_\n",
+        "Supongamos que el valor exacto que queremos calcular es $M$, y tenemos una aproximación inicial $N_1(h)$ con un error de truncamiento de orden $\\mathcal{O}(h^p)$. El valor exacto se puede expresar mediante una expansión en serie de la forma:$$M = N_1(h) + K_1 h^p + K_2 h^{p+q} + K_3 h^{p+q+r} + \\dots$$Donde $K_1, K_2, \\dots$ son constantes que no dependen de $h$, y $p$ es la potencia del término de error principal.Si evaluamos la misma función de aproximación reduciendo el tamaño del paso a la mitad ($h/2$), la ecuación se convierte en:$$M = N_1\\left(\\frac{h}{2}\\right) + K_1 \\left(\\frac{h}{2}\\right)^p + K_2 \\left(\\frac{h}{2}\\right)^{p+q} + \\dots$$El objetivo de la extrapolación es eliminar el término principal del error ($K_1 h^p$). Multiplicando la segunda ecuación por $2^p$, restándole la primera ecuación y despejando $M$, obtenemos la fórmula general de la Extrapolación de Richardson:$$N_2(h) = N_1\\left(\\frac{h}{2}\\right) + \\frac{N_1\\left(\\frac{h}{2}\\right) - N_1(h)}{2^p - 1}$$Esta nueva aproximación $N_2(h)$ ha cancelado con éxito el error de orden $p$, por lo que su nuevo error de truncamiento es de orden $O(h^{p+q})$. El proceso puede aplicarse iterativamente (extrapolación de orden superior) para obtener $N_3(h)$, $N_4(h)$, etc., eliminando los términos de error sucesivos."
+      ],
+      "metadata": {
+        "id": "qiY7pDc50pDE"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "###_Teorema(Integración de Romberg)_\n",
+        "De lo anterior tenemos que para la integracion de Romberg donde tomaremos $m_1=1, m_2=2, m_3=4,...,m_n = 2^{n-1}$, con $n$ entero positivo para aplicar la regla del trapecio.\n",
+        "Loz valores del tamaño de paso correspondiente son $h_k=\\frac{b-a}{m_k}=\\frac{b-a}{2^{k-1}}$ y $R_{k,1}=\\frac{1}{2}[R_{k-1,1}+h_{k-1}\\sum_{i=1}^{2^{k-2}}f(a+(2i-1)h_k] \\forall k=2,3,...,n$.\n",
+        "\n",
+        "Para obtener usando la extrapolación de Richardson, se obtiene:\n",
+        "$R_{k,j}=R_{k,j-1}+ \\frac{R_{k,j-1}-R_{k-1.j-1}}{4^{j-1}-1}$\n",
+        "Dandonos la tabla\n",
+        "$R_{1,1}$\\\n",
+        "$R_{2,1}$   $R_{2,2}$\\\n",
+        "$R_{3,1}$   $R_{3,2}$  $R_{3,3}$\\\n",
+        "$R_{4,1}$   $R_{4,2}$  $R_{4,3}$  $R_{4,4}$\\\n",
+        "$\\vdots$"
+      ],
+      "metadata": {
+        "id": "sG238XlTv6yu"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Para aproximar una integral $I = \\int_{a}^{b} f(x)dx\\ $ con un entero $ n > 0 $ tenemos el siguiente código"
+      ],
+      "metadata": {
+        "id": "JgwKU8CCLmq7"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import numpy as np\n",
+        "import matplotlib.pyplot as plt\n",
+        "import sympy as sy"
+      ],
+      "metadata": {
+        "id": "SVaXe10ZTHw8"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "\n",
+        "def IR(f, a, b, n):\n",
+        "\n",
+        "    R = [[0.0] * n for _ in range(2)]\n",
+        "    h = b - a\n",
+        "    R[0][0] = (h / 2) * (f(a) + f(b)) # se define R_[1,1]\n",
+        "\n",
+        "    encabezado = \" k | \" + \" | \".join([f\"  R(k,{j+1})  \" for j in range(n)]) + \" |\"#hacemos la estructura del encabezado de la tabla .join sirve para juntar cadenas de caracteres y hacer la tabla\n",
+        "    print(\"-\" * len(encabezado))\n",
+        "    print(encabezado)\n",
+        "    print(\"-\" * len(encabezado))\n",
+        "\n",
+        "    print(f\"{1:2} | {R[0][0]:10.10f} |\") # se imprime R_[1,j]\n",
+        "\n",
+        "    for i in range(2, n + 1): # Haciendo la columna R_[1,j]\n",
+        "        suma = 0.0\n",
+        "        lk = 2**(i - 2)\n",
+        "        for k in range(1, lk + 1):\n",
+        "            suma += f(a + (k - 0.5) * h)\n",
+        "\n",
+        "        R[1][0] = 0.5 * (R[0][0] + h * suma) #regla del trapecio para cada termino de la primer columna\n",
+        "        for j in range(2, i + 1): #empezamos la extrapolacion de Richardson\n",
+        "            R[1][j-1] = R[1][j-2] + (R[1][j-2] - R[0][j-2]) / (4**(j-1) - 1)\n",
+        "\n",
+        "        r = f\"{i:2} | \" # Construir e imprimir la fila actual formateada para la tabla\n",
+        "        for j in range(i):\n",
+        "            r += f\"{R[1][j]:10.10f} | \"\n",
+        "        print(r)\n",
+        "        h = h / 2 # se actualiza h\n",
+        "        for j in range(1, i + 1): # Copiar la fila inferior a la fila superior\n",
+        "            R[0][j-1] = R[1][j-1]\n",
+        "\n",
+        "    print(\"-\" * len(encabezado))\n",
+        "\n",
+        "    return R[0][n-1] #La mejor aproximacion"
+      ],
+      "metadata": {
+        "id": "oe4JnQz2Y4tv"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "###_EJEMPLO_\n",
+        "Calcular usando la integración de Romberg\n",
+        "$$\\int_{0}^{\\pi}\\sin{x}dx$$"
+      ],
+      "metadata": {
+        "id": "6jnwhACHnoAR"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def f(x):\n",
+        "  return np.sin(x)\n",
+        "  print(\"Evaluando integral de sen(x) en [0, pi]:\\n\")\n",
+        "resultado = IR(f, 0, np.pi , 6)\n",
+        "print(f\"\\nLa aproximación final es: {resultado:.10f}\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "9B4Y3JzQTfhU",
+        "outputId": "65742d07-5465-496d-f484-b9cdaa4318a4"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "----------------------------------------------------------------------------------\n",
+            " k |   R(k,1)   |   R(k,2)   |   R(k,3)   |   R(k,4)   |   R(k,5)   |   R(k,6)   |\n",
+            "----------------------------------------------------------------------------------\n",
+            " 1 | 0.0000000000 |\n",
+            " 2 | 1.5707963268 | 2.0943951024 | \n",
+            " 3 | 1.8961188979 | 2.0045597550 | 1.9985707318 | \n",
+            " 4 | 1.9742316019 | 2.0002691699 | 1.9999831309 | 2.0000055500 | \n",
+            " 5 | 1.9935703438 | 2.0000165910 | 1.9999997525 | 2.0000000163 | 1.9999999946 | \n",
+            " 6 | 1.9983933610 | 2.0000010334 | 1.9999999962 | 2.0000000001 | 2.0000000000 | 2.0000000000 | \n",
+            "----------------------------------------------------------------------------------\n",
+            "\n",
+            "La aproximación final es: 2.0000000000\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Esto nos dice que $\\int_{0}^{\\pi}\\sin{x}dx = 2.0000000000$"
+      ],
+      "metadata": {
+        "id": "PMH-f_Jnp5hA"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Dandonos el resultado exacto a lo que vale la integral, por lo que es una buena opción para integrar y dar un valor casi exacto, teniendo el codigo por que a mano si las iteraciones son muy grandes costara mucho"
+      ],
+      "metadata": {
+        "id": "zxVTOFxmohTc"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "$$ VÁZQUEZ \\ PÉREZ \\ GERARDO \\ EDAIN $$"
+      ],
+      "metadata": {
+        "id": "xfvMvUJmxnYp"
+      }
+    }
+  ]
+}
